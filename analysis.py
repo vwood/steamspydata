@@ -210,17 +210,22 @@ ys = data['Approx Profit'].values
 m = LinearRegression()
 m.fit(xs, ys)
 
-print "R^2: {:8.4f}".format(m.score(xs, ys))
-print
+print("R^2: {:8.4f}".format(m.score(xs, ys)))
+print()
 for feature, coef in zip(features, m.coef_):
-    print "{:20s} {:16.4f}".format(feature, coef)
-print "{:20s} {:16.4f}".format("intercept", m.intercept_)
-print
+    print("{:20s} {:16.4f}".format(feature, coef))
+print("{:20s} {:16.4f}".format("intercept", m.intercept_))
+print()
 
 if True:
-    print data.ix[0]
+    print(data.ix[0])
 
-print
-print data['Release date']
+print()
+for game, date in zip(data['Game'], data['Release date']):
+    try:
+        if len(date.split('/')) != 3:
+            print(game, date)
+    except:
+        print(game, date)
     
 
