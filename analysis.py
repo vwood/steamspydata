@@ -11,6 +11,8 @@ import myutils as mu
 import pylab as pl
 import glob
 import seaborn as sns
+from collections import Counter
+from scipy.stats import boxcox
 
 """
 Analysis:
@@ -18,42 +20,44 @@ Analysis:
 Every plot here is a log plot on at least one axis
 Games sales are distributed very exponentially, with decreasing numbers of games at increasing levels of profitability. There is a limited amount of brand space to go around on the Steam platform.
 
-TODO - look into release dates (will need months, sigh)
+TODO - Add log versions to regression / boxcox transform.
 
 TODO - remove free games (skew results because they don't make profit at all!)
 
+TODO - examine outliers, add classes to graphs, annotate with game names, draw on top of graphs with clusters
 
+TODO - check outliers that he mentions in presentation (small number of players causing instability in playtime variables?)
 """
 
 
 d1 = pd.read_csv('data/2016 Games on Steam - Indie AND Action.csv').dropna(how='all')
 d1.rename(columns={'#': '#_indie&action'}, inplace=True)
 d1['is_action'] = 1
-d1['is_indie'] = 1
+# d1['is_indie'] = 1
 
 d2 = pd.read_csv('data/2016 Games on Steam - Indie AND Strategy.csv').dropna(how='all')
 d2.rename(columns={'#': '#_indie&strategy'}, inplace=True)
 d2['is_strategy'] = 1
-d2['is_indie'] = 1
+# d2['is_indie'] = 1
 
 d3 = pd.read_csv('data/2016 Games on Steam - Indie AND Sandbox.csv').dropna(how='all')
 d3.rename(columns={'#': '#_indie&sandbox'}, inplace=True)
 d3['is_sandbox'] = 1
-d3['is_indie'] = 1
+# d3['is_indie'] = 1
 
 d4 = pd.read_csv('data/2016 Games on Steam - Indie.csv').dropna(how='all')
 d4.rename(columns={'#': '#_indie'}, inplace=True)
-d4['is_indie'] = 1
+# d4['is_indie'] = 1
 
 d5 = pd.read_csv('data/2016 Games on Steam - Indie AND Survival.csv').dropna(how='all')
 d5.rename(columns={'#': '#_indie&survival'}, inplace=True)
 d5['is_survival'] = 1
-d5['is_indie'] = 1
+# d5['is_indie'] = 1
 
 d6 = pd.read_csv('data/2016 Games on Steam - Indie AND Simulation.csv').dropna(how='all')
 d6.rename(columns={'#': '#_indie&simulation'}, inplace=True)
 d6['is_simulation'] = 1
-d6['is_indie'] = 1
+# d6['is_indie'] = 1
 
 d7 = pd.read_csv('data/2016 Games on Steam - Platformer AND Puzzle.csv').dropna(how='all')
 d7.rename(columns={'#': '#_platformer&puzzle'}, inplace=True)
@@ -63,12 +67,12 @@ d7['is_puzzle'] = 1
 d8 = pd.read_csv('data/2016 Games on Steam - Indie AND Platformer.csv').dropna(how='all')
 d8.rename(columns={'#': '#_indie&platformer'}, inplace=True)
 d8['is_platformer'] = 1
-d8['is_indie'] = 1
+#d8['is_indie'] = 1
 
 d9 = pd.read_csv('data/2016 Games on Steam - Indie AND RPG.csv').dropna(how='all')
 d9.rename(columns={'#': '#_indie&RPG'}, inplace=True)
 d9['is_RPG'] = 1
-d9['is_indie'] = 1
+#d9['is_indie'] = 1
 
 for df in [d1, d2, d3, d4, d5, d6, d7, d8, d9]:
     df.drop('c', axis=1, inplace=True)
@@ -134,7 +138,7 @@ data['Players'] = data['Players'].apply(convert_number)
 data['Median Playtime'] = data['Median Playtime'].apply(convert_time)
 data['Avg Playtime'] = data['Avg Playtime'].apply(convert_time)
 
-for c in ['is_RPG', 'is_action', 'is_indie', 'is_platformer', 'is_puzzle',
+for c in ['is_RPG', 'is_action', 'is_puzzle', 'is_platformer', 'is_puzzle',
           'is_sandbox', 'is_simulation', 'is_strategy', 'is_survival']:
     data[c].fillna(0, inplace=True)
 
@@ -167,7 +171,32 @@ data['HasScore>90%'] = (data['Score'] > 90).astype(int)
 data['HasScore>90%'] = (data['Score'] > 90).astype(int)
 
 data['Approx Profit'] = data['Owners'] * data['Price']
-# data['2016-ReleaseYear'] = data['Release date'].apply(lambda x:2016-int(x.split('/')[-1]))
+
+# Drop nan dates - these are a few games from pre-2016
+data.dropna(subset=['Release date'], inplace=True)
+
+# data['Original date'] = data['Release date']
+data['Release date'] = pd.to_datetime(data['Release date'])
+
+# Confirm all dates are from 2016
+# print(max(data['Release date']))
+
+end_of_2016 = pd.to_datetime('2017-01-01')
+data['DaysSinceRelease'] = data['Release date'].apply(lambda x: (end_of_2016 - x).days)
+
+data['VRInTitle'] = data['Game'].apply(lambda x:
+                                       int('vr' in x.lower()))
+data['2InTitle'] = data['Game'].apply(lambda x:
+                                      int('2' in x))
+data['SpaceInTitle'] = data['Game'].apply(lambda x:
+                                          int('space' in x.lower()))
+data['SuperInTitle'] = data['Game'].apply(lambda x:
+                                          int('super' in x.lower()))
+data['TheInTitle'] = data['Game'].apply(lambda x:
+                                        int('the' in x.lower()))
+data['OfInTitle'] = data['Game'].apply(lambda x:
+                                       int('of' in x.lower()))
+
 
 pl.scatter(data['Price'],
            np.log(data['Approx Profit']),
@@ -176,37 +205,156 @@ pl.xlabel("Price")
 pl.ylabel("log Profit")
 mu.plot_out()
 
+pl.hexbin(data['Price'],
+           np.log(data['Approx Profit']),
+          gridsize=32,
+          mincnt=1,
+          cmap=pl.cm.winter)
+pl.colorbar()          
+pl.xlabel("Price")
+pl.ylabel("log Profit")
+mu.plot_out()
+
+
 pl.scatter(np.log(data['Players']),
-           np.log(data['Approx Profit']), alpha=0.3, lw=0.2)
+           np.log(data['Approx Profit']),
+           alpha=0.3, lw=0.2)
 pl.xlabel("log Players")
 pl.ylabel("log Profit")
+mu.plot_out()
+
+#pl.scatter(data['DaysSinceRelease'],
+#           np.log(data['Owners']),
+#           alpha=0.3, lw=0.2)
+pl.hexbin(data['DaysSinceRelease'],
+          np.log(data['Owners']),
+          gridsize=32,
+          mincnt=1,
+          cmap=pl.cm.winter)
+pl.colorbar()          
+pl.xlabel("Days since release")
+pl.ylabel("log Owners")
+mu.plot_out()
+
+pl.hexbin(data['DaysSinceRelease'],
+          np.log(data['Players']),
+          gridsize=32,
+          mincnt=1,
+          cmap=pl.cm.winter)
+pl.colorbar()          
+pl.xlabel("Days since release")
+pl.ylabel("log Players")
+mu.plot_out()
+print("Line artifact is at 500 players")
+
+# pl.scatter(data['DaysSinceRelease'],
+#           np.log(data['Approx Profit']),
+#           alpha=0.3, lw=0.2)
+
+pl.hexbin(data['DaysSinceRelease'],
+          np.log(data['Approx Profit']),
+          gridsize=32,
+          mincnt=1,
+          cmap=pl.cm.winter)
+pl.colorbar()          
+pl.xlabel("Days since release")
+pl.ylabel("log Approx Profit")
 mu.plot_out()
 
 pl.scatter(np.log(data['Median Playtime']),
            np.log(data['Approx Profit']),
            alpha=0.3, lw=0.2)
-pl.xlabel("log Median Playtime")
-pl.ylabel("log Profit")
+pl.axvline(x=np.log(3 * 60 * 60),
+           ymin=0, ymax=1, c='r')
+pl.annotate('3 hours', xy=(np.log(3 * 60 * 60) + 0.2, 5))
+pl.xlabel("Median Playtime (log)")
+pl.ylabel("Profit (log)")
 mu.plot_out()
 
 pl.scatter(np.log(data['Avg Playtime']),
            np.log(data['Approx Profit']),
            alpha=0.3, lw=0.2)
+pl.axvline(x=np.log(3 * 60 * 60),
+           ymin=0, ymax=1, c='r')
+pl.annotate('3 hours', xy=(np.log(3 * 60 * 60) + 0.2, 5))
 pl.xlabel("log Avg Playtime")
 pl.ylabel("log Profit")
 mu.plot_out()
 
 pl.scatter(np.log(data['Players']),
            np.log(data['Owners']),
+           c = data['DaysSinceRelease'],
            alpha=0.3, lw=0.2)
 pl.xlabel("log Players")
 pl.ylabel("log Owners")
+pl.colorbar()
 mu.plot_out()
 
+# Subtrace means for Regression
+data['Avg Playtime meaned'] = (data['Avg Playtime'] -
+                               np.mean(data['Avg Playtime']))
+data['Median Playtime meaned'] = (data['Median Playtime'] -
+                                  np.mean(data['Median Playtime']))
+data['Players meaned'] = (data['Players'] -
+                          np.mean(data['Players']))
 
-features = ['Avg Playtime', 'Median Playtime', 'Players', 'is_RPG', 'is_action', 'is_indie', 'is_platformer', 'is_sandbox', 'is_simulation', 'is_strategy', 'is_survival', 'HasScore', 'HasScore>50%']
-xs = data[features].values
+if False:
+    data['bc Avg Playtime'], _ = boxcox(data['Avg Playtime'])
+    data['bc Median Playtime'], _ = boxcox(data['Median Playtime'])
+    data['bc Players'], _ = boxcox(data['Players'])
+    data['bc DaysSinceRelease'], _ = boxcox(data['DaysSinceRelease'])
+    
+features = [
+    'Avg Playtime meaned',
+    'Median Playtime meaned',
+    'Players meaned',
+
+    'is_RPG',
+#    'is_action',
+    'is_puzzle',
+    'is_platformer',
+    'is_sandbox',
+    'is_simulation',
+    'is_strategy',
+    'is_survival',
+    'HasScore',
+    'HasScore>50%',
+    'DaysSinceRelease',
+    'VRInTitle',
+    '2InTitle',
+    'SpaceInTitle',
+    'SuperInTitle',
+#    'TheInTitle',
+#    'OfInTitle'
+]
+
+
+print("R^2 without feature:")
+for f in features:
+    new_features = features[:]
+    new_features.remove(f)
+    
+    xs = data[new_features].values.astype(float)
+    ys = data['Approx Profit'].values
+
+    m = LinearRegression()
+    m.fit(xs, ys)
+
+    score = m.score(xs, ys)
+
+    print("{:20s} {:9.6f}".format(f, score))
+print()
+
+xs = data[features].values.astype(float)
 ys = data['Approx Profit'].values
+
+if False:
+    # Show feature correlation plot
+    correlations = np.corrcoef(xs.T)
+    pl.imshow(correlations, cmap=pl.cm.jet, interpolation='nearest')
+    pl.colorbar()
+    mu.plot_out()
+
 m = LinearRegression()
 m.fit(xs, ys)
 
@@ -221,11 +369,43 @@ if True:
     print(data.ix[0])
 
 print()
-for game, date in zip(data['Game'], data['Release date']):
-    try:
-        if len(date.split('/')) != 3:
-            print(game, date)
-    except:
-        print(game, date)
-    
+vocab = Counter()
+letters = Counter()
+for game in data['Game']:
+    game = game.lower().replace(':', '').replace('-', '').replace('&', '')
+    game = game.replace('?', '').replace(')', '').replace('(', '')
+    game = game.replace('!', '').replace('"', '').replace("'", '')
+    for word in game.lower().split():
+        vocab[word] += 1
+
+print(" --- Common words ---")        
+for k, v in vocab.most_common(20):
+    print("{:20s} {:10d}".format(k, v))
+
+print()    
+
+for i in np.argsort(data['Avg Playtime'])[-20:] :
+    print("{:35s} {:9.0f} {:10.0f} {:10.0f}".format(data.iloc[i]['Game'],
+                                                data.iloc[i]['Avg Playtime'] / 3600,
+                                                data.iloc[i]['Players'],
+                                                data.iloc[i]['Owners']))
+print()
+for i in np.argsort(data['Median Playtime'])[-20:]:
+    print("{:35s} {:9.0f} {:10.0f} {:10.0f}".format(data.iloc[i]['Game'],
+                                                data.iloc[i]['Median Playtime'] / 3600,
+                                                data.iloc[i]['Players'],
+                                                data.iloc[i]['Owners']))
+print()
+for i in np.argsort(data['Players'])[-20:]:
+    print("{:35s} {:9.0f} {:10.0f} {:10.0f}".format(data.iloc[i]['Game'],
+                                                data.iloc[i]['Avg Playtime'] / 3600,
+                                                data.iloc[i]['Players'],
+                                                data.iloc[i]['Owners']))
+print()
+for i in np.argsort(data['Owners'])[-20:]:
+    print("{:35s} {:9.0f} {:10.0f} {:10.0f}".format(data.iloc[i]['Game'],
+                                                data.iloc[i]['Avg Playtime'] / 3600,
+                                                data.iloc[i]['Players'],
+                                                data.iloc[i]['Owners']))
+
 
