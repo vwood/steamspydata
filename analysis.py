@@ -261,24 +261,38 @@ pl.xlabel("Days since release")
 pl.ylabel("log Approx Profit")
 mu.plot_out()
 
-pl.scatter(np.log(data['Median Playtime']),
-           np.log(data['Approx Profit']),
-           alpha=0.3, lw=0.2)
-pl.axvline(x=np.log(3 * 60 * 60),
+print(np.sum(data['Median Playtime'] <= 0))
+print(np.sum(data['Approx Profit'] <= 0))
+
+#pl.scatter((data['Median Playtime'].values),
+#           (data['Approx Profit'].values),
+#           alpha=0.3, lw=0.2)
+pl.loglog((data['Median Playtime'].values),
+          (data['Approx Profit'].values),
+          'bo',
+          alpha=0.3, lw=0.2)
+pl.axvline(x=(3 * 60 * 60),
            ymin=0, ymax=1, c='r')
-pl.annotate('3 hours', xy=(np.log(3 * 60 * 60) + 0.2, 5))
+pl.annotate('3 hours', xy=((3 * 60 * 60) + 800, 500))
 pl.xlabel("Median Playtime (log)")
 pl.ylabel("Profit (log)")
+#pl.xscale('log')
+#pl.yscale('log')
+# pl.tight_layout()
 mu.plot_out()
 
-pl.scatter(np.log(data['Avg Playtime']),
-           np.log(data['Approx Profit']),
-           alpha=0.3, lw=0.2)
-pl.axvline(x=np.log(3 * 60 * 60),
+#pl.scatter(np.log(data['Avg Playtime']),
+#           np.log(data['Approx Profit']),
+#           alpha=0.3, lw=0.2)
+pl.loglog((data['Avg Playtime']),
+          (data['Approx Profit']),
+          'bo',
+          alpha=0.3, lw=0.1)
+pl.axvline(x=(3 * 60 * 60),
            ymin=0, ymax=1, c='r')
-pl.annotate('3 hours', xy=(np.log(3 * 60 * 60) + 0.2, 5))
-pl.xlabel("log Avg Playtime")
-pl.ylabel("log Profit")
+pl.annotate('3 hours', xy=((3 * 60 * 60) + 800, 500))
+pl.xlabel("Mean Playtime (log)")
+pl.ylabel("Profit (log)")
 mu.plot_out()
 
 pl.scatter(np.log(data['Players']),
