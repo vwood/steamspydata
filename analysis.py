@@ -15,6 +15,10 @@ import seaborn as sns
 from collections import Counter
 from scipy.stats import boxcox
 
+pl.rc('font', size=16)
+pl.rc('axes', labelsize=16)
+pl.rc('xtick', labelsize=12)
+pl.rc('ytick', labelsize=12)
 """
 Analysis:
 
@@ -160,7 +164,7 @@ data['HasScore>80%'] = (data['Score'] > 80).astype(int)
 data['HasScore>90%'] = (data['Score'] > 90).astype(int)
 data['HasScore>90%'] = (data['Score'] > 90).astype(int)
 
-data['Approx Profit'] = data['Owners'] * data['Price']
+data['Approx Net Revenue'] = data['Owners'] * data['Price']
 
 # Drop nan dates - these are a few games from pre-2016
 data.dropna(subset=['Release date'], inplace=True)
@@ -189,36 +193,40 @@ data['OfInTitle'] = data['Game'].apply(lambda x:
 
 data = data[data['Price'] > 0.0]
 
+figsize = (10, 7)
+dpi = 100
+
+pl.figure(figsize=figsize, dpi=dpi)
 pl.semilogy(data['Price'],
-            data['Approx Profit'],
+            data['Approx Net Revenue'],
             'bo',
             alpha=0.3, lw=0.2)
 pl.xlabel("Price")
-pl.ylabel("Estimated Profit (log)")
+pl.ylabel("Estimated Net Revenue (log)")
 mu.plot_out()
 
+pl.figure(figsize=figsize, dpi=dpi)
 pl.hexbin(data['Price'],
-          np.log(data['Approx Profit']),
+          np.log(data['Approx Net Revenue']),
           gridsize=32,
           mincnt=1,
           cmap=pl.cm.winter)
 pl.colorbar()          
 pl.xlabel("Price")
-pl.ylabel("Estimated Profit (log)")
+pl.ylabel("Estimated Net Revenue (log)")
 mu.plot_out()
 
 
+pl.figure(figsize=figsize, dpi=dpi)
 pl.loglog(data['Players'],
-          data['Approx Profit'],
+          data['Approx Net Revenue'],
           'bo',
           alpha=0.3, lw=0.2)
 pl.xlabel("Players (log)")
-pl.ylabel("Estimated Profit (log)")
+pl.ylabel("Estimated Net Revenue (log)")
 mu.plot_out()
 
-#pl.scatter(data['DaysSinceRelease'],
-#           np.log(data['Owners']),
-#           alpha=0.3, lw=0.2)
+pl.figure(figsize=figsize, dpi=dpi)
 pl.hexbin(data['DaysSinceRelease'],
           np.log10(data['Owners']),
           gridsize=32,
@@ -229,6 +237,7 @@ pl.xlabel("Days since release")
 pl.ylabel("Owners (log 10)")
 mu.plot_out()
 
+pl.figure(figsize=figsize, dpi=dpi)
 pl.hexbin(data['DaysSinceRelease'],
           np.log10(data['Players']),
           gridsize=32,
@@ -240,54 +249,45 @@ pl.ylabel("Estimated Players (log 10)")
 mu.plot_out()
 print("Line artifact is at 500 players")
 
-# pl.scatter(data['DaysSinceRelease'],
-#           np.log(data['Approx Profit']),
-#           alpha=0.3, lw=0.2)
-
+pl.figure(figsize=figsize, dpi=dpi)
 pl.hexbin(data['DaysSinceRelease'],
-          np.log(data['Approx Profit']),
+          np.log(data['Approx Net Revenue']),
           gridsize=32,
           mincnt=1,
           cmap=pl.cm.winter)
 pl.colorbar()          
 pl.xlabel("Days since release")
-pl.ylabel("log Approx Profit")
+pl.ylabel("log Approx Net Revenue")
 mu.plot_out()
 
 print(np.sum(data['Median Playtime'] <= 0))
-print(np.sum(data['Approx Profit'] <= 0))
+print(np.sum(data['Approx Net Revenue'] <= 0))
 
-#pl.scatter((data['Median Playtime'].values),
-#           (data['Approx Profit'].values),
-#           alpha=0.3, lw=0.2)
+pl.figure(figsize=figsize, dpi=dpi)
 pl.loglog((data['Median Playtime'].values),
-          (data['Approx Profit'].values),
+          (data['Approx Net Revenue'].values),
           'bo',
           alpha=0.3, lw=0.2)
 pl.axvline(x=(3 * 60 * 60),
            ymin=0, ymax=1, c='r')
 pl.annotate('3 hours', xy=((3 * 60 * 60) + 800, 500))
 pl.xlabel("Median Playtime (log)")
-pl.ylabel("Profit (log)")
-#pl.xscale('log')
-#pl.yscale('log')
-# pl.tight_layout()
+pl.ylabel("Net Revenue (log)")
 mu.plot_out()
 
-#pl.scatter(np.log(data['Avg Playtime']),
-#           np.log(data['Approx Profit']),
-#           alpha=0.3, lw=0.2)
+pl.figure(figsize=figsize, dpi=dpi)
 pl.loglog((data['Avg Playtime']),
-          (data['Approx Profit']),
+          (data['Approx Net Revenue']),
           'bo',
           alpha=0.3, lw=0.1)
 pl.axvline(x=(3 * 60 * 60),
            ymin=0, ymax=1, c='r')
 pl.annotate('3 hours', xy=((3 * 60 * 60) + 800, 500))
 pl.xlabel("Mean Playtime (log)")
-pl.ylabel("Profit (log)")
+pl.ylabel("Net Revenue (log)")
 mu.plot_out()
 
+pl.figure(figsize=figsize, dpi=dpi)
 pl.scatter(np.log(data['Players']),
            np.log(data['Owners']),
            c = data['DaysSinceRelease'],
@@ -342,7 +342,7 @@ for f in features:
     new_features.remove(f)
     
     xs = data[new_features].values.astype(float)
-    ys = data['Approx Profit'].values
+    ys = data['Approx Net Revenue'].values
 
     m = LinearRegression()
     m.fit(xs, ys)
@@ -353,7 +353,7 @@ for f in features:
 print()
 
 xs = data[features].values.astype(float)
-ys = data['Approx Profit'].values
+ys = data['Approx Net Revenue'].values
 
 if False:
     # Show feature correlation plot
