@@ -6,6 +6,16 @@ We estimate profit by taking the product of the owners given by Steam Spy and th
 
 This is a limitation of the data, as including the price point selected would be interesting.
 
+
+![Players by Days Since Release](./plots/players_by_days.png)
+Notice there is an artifact just under 10^3 (or around 500) players. I'm guessing this is either from steamspy or by how the data is collected.
+
+![Profit by Days Since Release](./plots/profit_by_days.png)
+There is a weak relationship here.
+
+![Profit by Playtime](./plots/profit_by_playtime.png)
+I would have liked to see the proportion of players with positive playtime, since many accounts will have games that have never been launched, and I'm sure that skews this data.
+
 ## Generating Features
 
 Examining common words taken from the titles reveals:
@@ -41,39 +51,28 @@ While many of these features would benefit from transforms to make them fit a no
 
 The regression almost wholly relies on the number of Players as feature. The R^2 drops from 0.857 to 0.140 without this feature. This will be due to the high correlation between the number of Players and the number of Owners.
 
-Without 
-Players meaned        0.139128
-is_RPG                0.856565
-is_puzzle             0.856560
-is_platformer         0.856390
-is_sandbox            0.856662
-is_simulation         0.856582
-is_strategy           0.856573
-is_survival           0.856180
-HasScore              0.856597
-HasScore>50%          0.856750
-DaysSinceRelease      0.856392
-VRInTitle             0.856739
-2InTitle              0.856656
-SpaceInTitle          0.856730
-SuperInTitle          0.856739
+| Feature               |   Coefficient | 
+|-----------------------|---------------|
+|Avg Playtime meaned    |        6.8    |
+|Median Playtime meaned |       -3.9    |
+|Players meaned         |       18.5    |
+|is_RPG                 |   -91339.3    |
+|is_puzzle              |  -285090.6    |
+|is_platformer          |  -181062.4    |
+|is_sandbox             |   132384.9    |
+|is_simulation          |   -85141.8    |
+|is_strategy            |   -86374.0    |
+|is_survival            |   263060.5    |
+|HasScore               |   -94658.9    |
+|HasScore>50%           |    -8945.2    |
+|DaysSinceRelease       |     -461.2    |
+|VRInTitle              |    45168.0    |
+|2InTitle               |   126918.9    |
+|SpaceInTitle           |   -76115.2    |
+|SuperInTitle           |   -75600.4    |
+|intercept              |   460374.0    |
 
 
-Avg Playtime meaned            6.8375
-Median Playtime meaned          -3.9889
-Players meaned                18.5191
-is_RPG                    -91339.3672
-is_puzzle                -285090.6131
-is_platformer            -181062.4905
-is_sandbox                132384.9794
-is_simulation             -85141.8353
-is_strategy               -86374.0631
-is_survival               263060.5015
-HasScore                  -94658.9344
-HasScore>50%               -8945.2930
-DaysSinceRelease            -461.2584
-VRInTitle                  45168.0215
-2InTitle                  126918.9739
-SpaceInTitle              -76115.2464
-SuperInTitle              -75600.4340
-intercept                 460374.0175
+So we see that the 'best' game we could create would be an indie sandbox survival game, with a title that mentions VR and is a sequel.
+
+The postive value of being a sequel is probably a sort of filter effect. Bad games will be less likely to generate a sequel.

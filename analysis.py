@@ -220,23 +220,23 @@ mu.plot_out()
 #           np.log(data['Owners']),
 #           alpha=0.3, lw=0.2)
 pl.hexbin(data['DaysSinceRelease'],
-          np.log(data['Owners']),
+          np.log10(data['Owners']),
           gridsize=32,
           mincnt=1,
           cmap=pl.cm.winter)
 pl.colorbar()          
 pl.xlabel("Days since release")
-pl.ylabel("Owners (log)")
+pl.ylabel("Owners (log 10)")
 mu.plot_out()
 
 pl.hexbin(data['DaysSinceRelease'],
-          np.log(data['Players']),
+          np.log10(data['Players']),
           gridsize=32,
           mincnt=1,
           cmap=pl.cm.winter)
 pl.colorbar()          
 pl.xlabel("Days since release")
-pl.ylabel("Estimated Players (log)")
+pl.ylabel("Estimated Players (log 10)")
 mu.plot_out()
 print("Line artifact is at 500 players")
 
