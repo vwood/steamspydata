@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from __future__ import print_function
 import numpy as np
 from zipfile import ZipFile
 import pandas as pd
@@ -20,10 +21,6 @@ Analysis:
 Every plot here is a log plot on at least one axis
 Games sales are distributed very exponentially, with decreasing numbers of games at increasing levels of profitability. There is a limited amount of brand space to go around on the Steam platform.
 
-TODO - Add log versions to regression / boxcox transform.
-
-TODO - remove free games (skew results because they don't make profit at all!)
-
 TODO - examine outliers, add classes to graphs, annotate with game names, draw on top of graphs with clusters
 
 TODO - check outliers that he mentions in presentation (small number of players causing instability in playtime variables?)
@@ -33,31 +30,25 @@ TODO - check outliers that he mentions in presentation (small number of players 
 d1 = pd.read_csv('data/2016 Games on Steam - Indie AND Action.csv').dropna(how='all')
 d1.rename(columns={'#': '#_indie&action'}, inplace=True)
 d1['is_action'] = 1
-# d1['is_indie'] = 1
 
 d2 = pd.read_csv('data/2016 Games on Steam - Indie AND Strategy.csv').dropna(how='all')
 d2.rename(columns={'#': '#_indie&strategy'}, inplace=True)
 d2['is_strategy'] = 1
-# d2['is_indie'] = 1
 
 d3 = pd.read_csv('data/2016 Games on Steam - Indie AND Sandbox.csv').dropna(how='all')
 d3.rename(columns={'#': '#_indie&sandbox'}, inplace=True)
 d3['is_sandbox'] = 1
-# d3['is_indie'] = 1
 
 d4 = pd.read_csv('data/2016 Games on Steam - Indie.csv').dropna(how='all')
 d4.rename(columns={'#': '#_indie'}, inplace=True)
-# d4['is_indie'] = 1
 
 d5 = pd.read_csv('data/2016 Games on Steam - Indie AND Survival.csv').dropna(how='all')
 d5.rename(columns={'#': '#_indie&survival'}, inplace=True)
 d5['is_survival'] = 1
-# d5['is_indie'] = 1
 
 d6 = pd.read_csv('data/2016 Games on Steam - Indie AND Simulation.csv').dropna(how='all')
 d6.rename(columns={'#': '#_indie&simulation'}, inplace=True)
 d6['is_simulation'] = 1
-# d6['is_indie'] = 1
 
 d7 = pd.read_csv('data/2016 Games on Steam - Platformer AND Puzzle.csv').dropna(how='all')
 d7.rename(columns={'#': '#_platformer&puzzle'}, inplace=True)
@@ -67,12 +58,10 @@ d7['is_puzzle'] = 1
 d8 = pd.read_csv('data/2016 Games on Steam - Indie AND Platformer.csv').dropna(how='all')
 d8.rename(columns={'#': '#_indie&platformer'}, inplace=True)
 d8['is_platformer'] = 1
-#d8['is_indie'] = 1
 
 d9 = pd.read_csv('data/2016 Games on Steam - Indie AND RPG.csv').dropna(how='all')
 d9.rename(columns={'#': '#_indie&RPG'}, inplace=True)
 d9['is_RPG'] = 1
-#d9['is_indie'] = 1
 
 for df in [d1, d2, d3, d4, d5, d6, d7, d8, d9]:
     df.drop('c', axis=1, inplace=True)
@@ -131,12 +120,13 @@ def convert_time(s):
         result *= 60
         result += int(i)
     return result
-        
+
 data['Price'] = data['Price'].apply(convert_number)
 data['Owners'] = data['Owners'].apply(convert_number)
 data['Players'] = data['Players'].apply(convert_number)
 data['Median Playtime'] = data['Median Playtime'].apply(convert_time)
 data['Avg Playtime'] = data['Avg Playtime'].apply(convert_time)
+
 
 for c in ['is_RPG', 'is_action', 'is_puzzle', 'is_platformer', 'is_puzzle',
           'is_sandbox', 'is_simulation', 'is_strategy', 'is_survival']:
@@ -197,6 +187,7 @@ data['TheInTitle'] = data['Game'].apply(lambda x:
 data['OfInTitle'] = data['Game'].apply(lambda x:
                                        int('of' in x.lower()))
 
+data = data[data['Price'] > 0.0]
 
 pl.scatter(data['Price'],
            np.log(data['Approx Profit']),
