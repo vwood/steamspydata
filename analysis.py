@@ -189,29 +189,31 @@ data['OfInTitle'] = data['Game'].apply(lambda x:
 
 data = data[data['Price'] > 0.0]
 
-pl.scatter(data['Price'],
-           np.log(data['Approx Profit']),
-           alpha=0.3, lw=0.2)
+pl.semilogy(data['Price'],
+            data['Approx Profit'],
+            'bo',
+            alpha=0.3, lw=0.2)
 pl.xlabel("Price")
-pl.ylabel("log Profit")
+pl.ylabel("Estimated Profit (log)")
 mu.plot_out()
 
 pl.hexbin(data['Price'],
-           np.log(data['Approx Profit']),
+          np.log(data['Approx Profit']),
           gridsize=32,
           mincnt=1,
           cmap=pl.cm.winter)
 pl.colorbar()          
 pl.xlabel("Price")
-pl.ylabel("log Profit")
+pl.ylabel("Estimated Profit (log)")
 mu.plot_out()
 
 
-pl.scatter(np.log(data['Players']),
-           np.log(data['Approx Profit']),
-           alpha=0.3, lw=0.2)
-pl.xlabel("log Players")
-pl.ylabel("log Profit")
+pl.loglog(data['Players'],
+          data['Approx Profit'],
+          'bo',
+          alpha=0.3, lw=0.2)
+pl.xlabel("Players (log)")
+pl.ylabel("Estimated Profit (log)")
 mu.plot_out()
 
 #pl.scatter(data['DaysSinceRelease'],
@@ -224,7 +226,7 @@ pl.hexbin(data['DaysSinceRelease'],
           cmap=pl.cm.winter)
 pl.colorbar()          
 pl.xlabel("Days since release")
-pl.ylabel("log Owners")
+pl.ylabel("Owners (log)")
 mu.plot_out()
 
 pl.hexbin(data['DaysSinceRelease'],
@@ -234,7 +236,7 @@ pl.hexbin(data['DaysSinceRelease'],
           cmap=pl.cm.winter)
 pl.colorbar()          
 pl.xlabel("Days since release")
-pl.ylabel("log Players")
+pl.ylabel("Estimated Players (log)")
 mu.plot_out()
 print("Line artifact is at 500 players")
 
