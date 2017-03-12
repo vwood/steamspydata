@@ -80,3 +80,27 @@ So we see that the 'best' game we could create would be an indie sandbox surviva
 
 The postive value of being a sequel is probably a sort of filter effect. Bad games will be less likely to generate a sequel.
 
+Finally, as a joke, here are more title variables (well beyond what the data can likely support).
+
+So you'd want to market your game as "A VR World 2: Heroes Edition"
+
+
+| Word                  |  Coefficient |
+|-----------------------|--------------|
+|VR                     |   54412.4    |
+|2                      |  130413.0    |
+|Space                  |  -72476.8    |
+|Super                  |  -70223.2    |
+|A                      |   28892.2    |
+|And                    |   -2540.7    |
+|In                     |  -31301.4    |
+|Game                   |  -17247.9    |
+|World                  |  241570.3    |
+|Adventure              | -150796.3    |
+|Simulator              |  -86860.7    |
+|Edition                |  104683.9    |
+|Heroes                 |   88670.7    |
+|Lost                   | -135700.5    |
+|Island                 | -215054.2    |
+|Last                   | -157986.2    |
+
