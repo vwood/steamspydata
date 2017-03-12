@@ -8,12 +8,15 @@ This is a limitation of the data, as including the price point selected would be
 
 
 ![Players by Days Since Release](./plots/players_by_days.png)
+
 Notice there is an artifact just under 10^3 (or around 500) players. I'm guessing this is either from steamspy or by how the data is collected.
 
 ![Profit by Days Since Release](./plots/profit_by_days.png)
+
 There is a weak relationship here.
 
 ![Profit by Playtime](./plots/profit_by_playtime.png)
+
 I would have liked to see the proportion of players with positive playtime, since many accounts will have games that have never been launched, and I'm sure that skews this data.
 
 ## Generating Features
@@ -76,3 +79,4 @@ The regression almost wholly relies on the number of Players as feature. The R^2
 So we see that the 'best' game we could create would be an indie sandbox survival game, with a title that mentions VR and is a sequel.
 
 The postive value of being a sequel is probably a sort of filter effect. Bad games will be less likely to generate a sequel.
+
